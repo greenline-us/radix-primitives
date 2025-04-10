@@ -251,23 +251,32 @@ DialogContent.displayName = CONTENT_NAME;
 
 type DialogContentTypeElement = DialogContentImplElement;
 interface DialogContentTypeProps
-  extends Omit<DialogContentImplProps, 'trapFocus' | 'disableOutsidePointerEvents'> {}
+  extends Omit<DialogContentImplProps, 'trapFocus' | 'disableOutsidePointerEvents'> {
+  /**
+   * A list of elements that should not be disabled when the dialog is a modal.
+   */
+  focusWhiteList?: HTMLElement[];
+}
 
 const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogContentTypeProps>(
   (props: ScopedProps<DialogContentTypeProps>, forwardedRef) => {
+    const { focusWhiteList, ...contentProps } = props;
     const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
     const contentRef = React.useRef<HTMLDivElement>(null);
     const composedRefs = useComposedRefs(forwardedRef, context.contentRef, contentRef);
 
-    // aria-hide everything except the content (better supported equivalent to setting aria-modal)
+    // aria-hide everything except the white-listed elements (better supported equivalent to setting aria-modal)
     React.useEffect(() => {
-      const content = contentRef.current;
-      if (content) return hideOthers(content);
-    }, []);
+      const whiteListElements = [...(focusWhiteList || []), contentRef.current].filter(
+        Boolean
+      ) as HTMLElement[];
+
+      if (whiteListElements.length) return hideOthers(whiteListElements);
+    }, [focusWhiteList]);
 
     return (
       <DialogContentImpl
-        {...props}
+        {...contentProps}
         ref={composedRefs}
         // we make sure focus isn't trapped once `DialogContent` has been closed
         // (closed !== unmounted when animating out)
