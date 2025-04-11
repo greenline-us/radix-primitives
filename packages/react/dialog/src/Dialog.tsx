@@ -250,13 +250,12 @@ DialogContent.displayName = CONTENT_NAME;
 /* -----------------------------------------------------------------------------------------------*/
 
 type DialogContentTypeElement = DialogContentImplElement;
-type FocusAllowListTypeElement = HTMLElement | React.RefObject<HTMLElement>;
 interface DialogContentTypeProps
   extends Omit<DialogContentImplProps, 'trapFocus' | 'disableOutsidePointerEvents'> {
   /**
    * A list of elements that should not be disabled when the dialog is a modal.
    */
-  focusAllowList?: FocusAllowListTypeElement | FocusAllowListTypeElement[];
+  focusAllowList?: React.RefObject<HTMLElement> | React.RefObject<HTMLElement>[];
 }
 
 const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogContentTypeProps>(
@@ -266,14 +265,12 @@ const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogCont
     const contentRef = React.useRef<HTMLDivElement>(null);
     const composedRefs = useComposedRefs(forwardedRef, context.contentRef, contentRef);
     const focusableElements = React.useMemo(() => {
-      const elements = Array.isArray(focusAllowList)
+      const refs = Array.isArray(focusAllowList)
         ? focusAllowList
         : focusAllowList
         ? [focusAllowList]
         : [];
-      return elements
-        .map((el) => (el instanceof HTMLElement ? el : el.current))
-        .filter(Boolean) as HTMLElement[];
+      return refs.map((el) => el.current).filter(Boolean) as HTMLElement[];
     }, [focusAllowList]);
 
     // aria-hide everything except the allow-listed elements (better supported equivalent to setting aria-modal)
