@@ -92,6 +92,42 @@ export const FocusTrap = () => (
   </>
 );
 
+export const FocusAllowList = () => {
+  const divRef = React.useRef<HTMLDivElement>(null);
+
+  return (
+    <>
+      <div ref={divRef} className={whiteListedElementClass()}>
+        Whitelisted element remains interactive and does not close the modal
+        <button type="button" onClick={() => alert('Button clicked')}>
+          Button
+        </button>
+      </div>
+
+      <Dialog.Root>
+        <Dialog.Trigger>open</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay className={overlayClass()} />
+          <Dialog.Content className={contentDefaultClass()} focusAllowList={divRef}>
+            <Dialog.Close>close</Dialog.Close>
+            <Dialog.Title>Title</Dialog.Title>
+            <Dialog.Description>Description</Dialog.Description>
+            <div>
+              <label htmlFor="firstName">First Name</label>
+              <input type="text" id="firstName" placeholder="John" />
+
+              <label htmlFor="lastName">Last Name</label>
+              <input type="text" id="lastName" placeholder="Doe" />
+
+              <button type="submit">Send</button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </>
+  );
+};
+
 export const CustomFocus = () => {
   const firstNameRef = React.useRef<HTMLInputElement>(null);
   const searchFieldRef = React.useRef<HTMLInputElement>(null);
@@ -523,49 +559,6 @@ export const Cypress = () => {
       <label>
         name: <input type="text" placeholder="name" />
       </label>
-    </>
-  );
-};
-
-export const FocusAllowList = () => {
-  const divRef = React.useRef<HTMLDivElement>(null);
-
-  return (
-    <>
-      <div ref={divRef} className={whiteListedElementClass()}>
-        Whitelisted element remains interactive when the modal is open
-        <button type="button" onClick={() => alert('Button clicked')}>
-          Button
-        </button>
-      </div>
-
-      <Dialog.Root>
-        <Dialog.Trigger>open</Dialog.Trigger>
-        <Dialog.Portal>
-          <Dialog.Overlay className={overlayClass()} />
-          <Dialog.Content
-            className={contentDefaultClass()}
-            focusAllowList={divRef}
-            onInteractOutside={(event) => {
-              const el = divRef.current;
-              if (el && event.composedPath().includes(el)) event.preventDefault();
-            }}
-          >
-            <Dialog.Close>close</Dialog.Close>
-            <Dialog.Title>Title</Dialog.Title>
-            <Dialog.Description>Description</Dialog.Description>
-            <div>
-              <label htmlFor="firstName">First Name</label>
-              <input type="text" id="firstName" placeholder="John" />
-
-              <label htmlFor="lastName">Last Name</label>
-              <input type="text" id="lastName" placeholder="Doe" />
-
-              <button type="submit">Send</button>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
     </>
   );
 };
