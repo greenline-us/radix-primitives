@@ -253,7 +253,7 @@ type DialogContentTypeElement = DialogContentImplElement;
 interface DialogContentTypeProps
   extends Omit<DialogContentImplProps, 'trapFocus' | 'disableOutsidePointerEvents'> {
   /**
-   * A list of elements that should not be disabled when the dialog is a modal.
+   * An elements ref, or list of refs, that should not be disabled when the dialog is a modal.
    */
   focusAllowList?: React.RefObject<HTMLElement> | React.RefObject<HTMLElement>[];
 }
@@ -317,8 +317,8 @@ const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogCont
         onFocusOutside={composeEventHandlers(props.onFocusOutside, (event) =>
           event.preventDefault()
         )}
-        // We prevent interactions with allow-listed elements from closing the modal
-        // by checking if any of the elements through with the event bubbles
+        // Prevent interactions with allow-listed elements from closing the modal
+        // by checking if the bubbling event passes though any elements that
         // are in the allowlist.
         onInteractOutside={(event) => {
           const whitelistedInteraction = event.composedPath().some((el) => {
