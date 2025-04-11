@@ -255,7 +255,7 @@ interface DialogContentTypeProps
   /**
    * A list of elements that should not be disabled when the dialog is a modal.
    */
-  focusWhiteList?: HTMLElement[];
+  focusWhiteList?: React.RefObject<HTMLElement> | React.RefObject<HTMLElement>[];
 }
 
 const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogContentTypeProps>(
@@ -269,13 +269,18 @@ const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogCont
     React.useEffect(() => {
       const whiteListElements: HTMLElement[] = [];
       const content = contentRef.current;
+      const focusableRefs = Array.isArray(focusWhiteList)
+        ? focusWhiteList
+        : focusWhiteList
+        ? [focusWhiteList]
+        : [];
 
       if (content) {
         whiteListElements.push(content);
       }
 
-      if (focusWhiteList) {
-        for (const element of focusWhiteList) {
+      for (const { current: element } of focusableRefs) {
+        if (element) {
           element.style.pointerEvents = 'auto';
           whiteListElements.push(element);
         }
