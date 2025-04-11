@@ -250,44 +250,49 @@ DialogContent.displayName = CONTENT_NAME;
 /* -----------------------------------------------------------------------------------------------*/
 
 type DialogContentTypeElement = DialogContentImplElement;
+type FocusAllowListTypeElement = HTMLElement | React.RefObject<HTMLElement>;
 interface DialogContentTypeProps
   extends Omit<DialogContentImplProps, 'trapFocus' | 'disableOutsidePointerEvents'> {
   /**
    * A list of elements that should not be disabled when the dialog is a modal.
    */
-  focusWhiteList?: React.RefObject<HTMLElement> | React.RefObject<HTMLElement>[];
+  focusAllowList?: FocusAllowListTypeElement | FocusAllowListTypeElement[];
 }
 
 const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogContentTypeProps>(
   (props: ScopedProps<DialogContentTypeProps>, forwardedRef) => {
-    const { focusWhiteList, ...contentProps } = props;
+    const { focusAllowList, ...contentProps } = props;
     const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
     const contentRef = React.useRef<HTMLDivElement>(null);
     const composedRefs = useComposedRefs(forwardedRef, context.contentRef, contentRef);
-
-    // aria-hide everything except the white-listed elements (better supported equivalent to setting aria-modal)
-    React.useEffect(() => {
-      const whiteListElements: HTMLElement[] = [];
-      const content = contentRef.current;
-      const focusableRefs = Array.isArray(focusWhiteList)
-        ? focusWhiteList
-        : focusWhiteList
-        ? [focusWhiteList]
+    const focusableElements = React.useMemo(() => {
+      const elements = Array.isArray(focusAllowList)
+        ? focusAllowList
+        : focusAllowList
+        ? [focusAllowList]
         : [];
+      return elements
+        .map((el) => (el instanceof HTMLElement ? el : el.current))
+        .filter(Boolean) as HTMLElement[];
+    }, [focusAllowList]);
+
+    // aria-hide everything except the allow-listed elements (better supported equivalent to setting aria-modal)
+    React.useEffect(() => {
+      const allowListedElements: HTMLElement[] = [];
+      const content = contentRef.current;
 
       if (content) {
-        whiteListElements.push(content);
+        allowListedElements.push(content);
       }
 
-      for (const { current: element } of focusableRefs) {
-        if (element) {
-          element.style.pointerEvents = 'auto';
-          whiteListElements.push(element);
-        }
+      for (const element of focusableElements) {
+        // make sure allow-listed elements are interactable
+        element.style.pointerEvents = 'auto';
+        allowListedElements.push(element);
       }
 
-      if (whiteListElements.length) return hideOthers(whiteListElements);
-    }, [focusWhiteList]);
+      return hideOthers(allowListedElements);
+    }, [focusableElements]);
 
     return (
       <DialogContentImpl

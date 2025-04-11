@@ -545,7 +545,7 @@ export const FocusAllowList = () => {
           <Dialog.Overlay className={overlayClass()} />
           <Dialog.Content
             className={contentDefaultClass()}
-            focusWhiteList={divRef}
+            focusAllowList={divRef}
             onInteractOutside={(event) => {
               const el = divRef.current;
               if (el && event.composedPath().includes(el)) event.preventDefault();
