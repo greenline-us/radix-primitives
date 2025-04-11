@@ -267,9 +267,19 @@ const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogCont
 
     // aria-hide everything except the white-listed elements (better supported equivalent to setting aria-modal)
     React.useEffect(() => {
-      const whiteListElements = [...(focusWhiteList || []), contentRef.current].filter(
-        Boolean
-      ) as HTMLElement[];
+      const whiteListElements: HTMLElement[] = [];
+      const content = contentRef.current;
+
+      if (content) {
+        whiteListElements.push(content);
+      }
+
+      if (focusWhiteList) {
+        for (const element of focusWhiteList) {
+          element.style.pointerEvents = 'auto';
+          whiteListElements.push(element);
+        }
+      }
 
       if (whiteListElements.length) return hideOthers(whiteListElements);
     }, [focusWhiteList]);
