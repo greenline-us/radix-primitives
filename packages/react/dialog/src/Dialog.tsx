@@ -320,6 +320,20 @@ const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogCont
         onFocusOutside={composeEventHandlers(props.onFocusOutside, (event) =>
           event.preventDefault()
         )}
+        // We prevent interactions with allow-listed elements from closing the modal
+        // by checking if any of the elements through with the event bubbles
+        // are in the allowlist.
+        onInteractOutside={(event) => {
+          const whitelistedInteraction = event.composedPath().some((el) => {
+            return el instanceof HTMLElement && focusableElements.includes(el);
+          });
+
+          if (whitelistedInteraction) {
+            event.preventDefault();
+          }
+
+          props.onInteractOutside?.(event);
+        }}
       />
     );
   }
