@@ -92,12 +92,20 @@ export const FocusTrap = () => (
   </>
 );
 
-export const FocusAllowList = () => {
-  const divRef = React.useRef<HTMLDivElement>(null);
+export const FocusLockExceptions = () => {
+  const focusLockExceptionRef = React.useRef<HTMLDivElement>(null);
+  const [focusLockExceptionEl, setFocusLockExceptionEl] = React.useState<HTMLDivElement | null>(
+    null
+  );
+
+  React.useEffect(() => {
+    if (!focusLockExceptionRef.current) return;
+    setFocusLockExceptionEl(focusLockExceptionRef.current);
+  }, []);
 
   return (
     <>
-      <div ref={divRef} className={whiteListedElementClass()}>
+      <div ref={focusLockExceptionRef} className={focusLockExceptionClass()}>
         Whitelisted element remains interactive and does not close the modal
         <button type="button" onClick={() => alert('Button clicked')}>
           Button
@@ -108,7 +116,10 @@ export const FocusAllowList = () => {
         <Dialog.Trigger>open</Dialog.Trigger>
         <Dialog.Portal>
           <Dialog.Overlay className={overlayClass()} />
-          <Dialog.Content className={contentDefaultClass()} focusAllowList={divRef}>
+          <Dialog.Content
+            className={contentDefaultClass()}
+            focusLockExceptions={focusLockExceptionEl ?? undefined}
+          >
             <Dialog.Close>close</Dialog.Close>
             <Dialog.Title>Title</Dialog.Title>
             <Dialog.Description>Description</Dialog.Description>
@@ -683,7 +694,7 @@ const overlayAttrClass = css(overlayClass, styles);
 const contentAttrClass = css(chromaticContentClass, styles);
 const closeAttrClass = css(styles);
 
-const whiteListedElementClass = css({
+const focusLockExceptionClass = css({
   position: 'sticky',
   display: 'flex',
   justifyContent: 'space-between',

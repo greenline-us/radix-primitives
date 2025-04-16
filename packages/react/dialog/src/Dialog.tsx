@@ -255,23 +255,24 @@ interface DialogContentTypeProps
   /**
    * An elements ref, or list of refs, that should not be disabled when the dialog is a modal.
    */
-  focusAllowList?: React.RefObject<HTMLElement> | React.RefObject<HTMLElement>[];
+  focusLockExceptions?: HTMLElement | HTMLElement[];
 }
 
 const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogContentTypeProps>(
   (props: ScopedProps<DialogContentTypeProps>, forwardedRef) => {
-    const { focusAllowList, ...contentProps } = props;
+    const { focusLockExceptions, ...contentProps } = props;
     const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
     const contentRef = React.useRef<HTMLDivElement>(null);
     const composedRefs = useComposedRefs(forwardedRef, context.contentRef, contentRef);
-    const focusableElements = React.useMemo(() => {
-      const refs = Array.isArray(focusAllowList)
-        ? focusAllowList
-        : focusAllowList
-        ? [focusAllowList]
-        : [];
-      return refs.map((el) => el.current).filter(Boolean) as HTMLElement[];
-    }, [focusAllowList]);
+    const focusableElements = React.useMemo(
+      () =>
+        Array.isArray(focusLockExceptions)
+          ? focusLockExceptions
+          : focusLockExceptions
+          ? [focusLockExceptions]
+          : [],
+      [focusLockExceptions]
+    );
 
     // aria-hide everything except the allow-listed elements (better supported equivalent to setting aria-modal)
     React.useEffect(() => {
@@ -321,11 +322,11 @@ const DialogContentModal = React.forwardRef<DialogContentTypeElement, DialogCont
         // by checking if the bubbling event passes though any elements that
         // are in the allowlist.
         onInteractOutside={(event) => {
-          const whitelistedInteraction = event.composedPath().some((el) => {
+          const allowListedInteractions = event.composedPath().some((el) => {
             return el instanceof HTMLElement && focusableElements.includes(el);
           });
 
-          if (whitelistedInteraction) {
+          if (allowListedInteractions) {
             event.preventDefault();
           }
 
